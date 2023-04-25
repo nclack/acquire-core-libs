@@ -62,6 +62,9 @@ reporter(int is_error,
 
 extern "C"
 {
+    // core-platform
+    int unit_test__monotonic_clock_increases_monotonically();
+    // device-properties
     int unit_test__storage__storage_property_string_check();
     int unit_test__storage__copy_string();
     int unit_test__device_state_as_string__is_defined_for_all();
@@ -83,6 +86,7 @@ main()
 
     const std::vector<testcase> tests{
 #define CASE(e) { .name = #e, .test = (e) }
+        CASE(unit_test__monotonic_clock_increases_monotonically),
         CASE(unit_test__storage__storage_property_string_check),
         CASE(unit_test__storage__copy_string),
         CASE(unit_test__device_state_as_string__is_defined_for_all),
