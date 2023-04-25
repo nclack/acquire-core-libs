@@ -1,7 +1,7 @@
 #include "stage.axis.h"
 #include "logger.h"
-#include "../driver.h"
-#include "../device.manager.h"
+#include "device/hal/driver.h"
+#include "device/hal/device.manager.h"
 
 #define containerof(P, T, F) ((T*)(((char*)(P)) - offsetof(T, F)))
 
