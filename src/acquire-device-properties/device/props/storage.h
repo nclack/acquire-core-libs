@@ -2,6 +2,7 @@
 #define H_ACQUIRE_PROPS_STORAGE_V0
 
 #include "components.h"
+#include "metadata.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -17,7 +18,35 @@ extern "C"
         struct String external_metadata_json;
         uint32_t first_frame_id;
         struct PixelScale pixel_scale_um;
-        uint32_t bytes_per_chunk;
+
+        /// Parameters for chunking.
+        /// Tile dimensions, width, height, and planes, are in pixels and
+        /// determine how to break up frames. Together with
+        /// `max_bytes_per_chunk`, they determine the dimensions of a chunk.
+        struct storage_properties_chunking_s
+        {
+            uint32_t max_bytes_per_chunk;
+            struct storage_properties_chunking_tile_s
+            {
+                uint32_t width, height, planes;
+            } tile;
+        } chunking;
+    };
+
+    struct StoragePropertyMetadata
+    {
+        /// Metadata for chunking.
+        /// Indicates whether chunking is supported, and if so, bounds on the
+        /// dimensions of tiles and the maximum number of bytes per chunk.
+        struct storage_property_metadata_chunking_s
+        {
+            uint8_t supported;
+            struct Property max_bytes_per_chunk;
+            struct storage_property_metadata_chunk_dim_s
+            {
+                struct Property width, height, planes;
+            } tile;
+        } chunking;
     };
 
     /// Initializes StorageProperties, allocating string storage on the heap
@@ -35,16 +64,13 @@ extern "C"
     /// @param[in] bytes_of_metadata Number of bytes in the `metadata` buffer
     ///                              including the terminating null.
     /// @param[in] pixel_scale_um The pixel scale or size in microns.
-    /// @param[in] bytes_per_chunk The size, in bytes, of a chunk file, if
-    /// applicable.
     int storage_properties_init(struct StorageProperties* out,
                                 uint32_t first_frame_id,
                                 const char* filename,
                                 size_t bytes_of_filename,
                                 const char* metadata,
                                 size_t bytes_of_metadata,
-                                const struct PixelScale pixel_scale_um,
-                                uint32_t bytes_per_chunk);
+                                struct PixelScale pixel_scale_um);
 
     /// Copies contents, reallocating string storage if necessary.
     /// @returns 1 on success, otherwise 0
@@ -75,6 +101,21 @@ extern "C"
     int storage_properties_set_external_metadata(struct StorageProperties* out,
                                                  const char* metadata,
                                                  size_t bytes_of_metadata);
+
+    /// @brief Set chunking properties for `out`.
+    /// Convenience function to set tiling/chunking properties in a single call.
+    /// @returns 1 on success, otherwise 0
+    /// @param[in, out] out The storage properties to change.
+    /// @param[in] tile_width The width, in px, of a tile.
+    /// @param[in] tile_height The height, in px, of a tile.
+    /// @param[in] tile_planes The number of @p tile_width x @p tile_height
+    ///            planes in a single tile.
+    /// @param[in] max_bytes_per_chunk The maximum size, in bytes, of a chunk.
+    int storage_properties_set_chunking_props(struct StorageProperties* out,
+                                              uint32_t tile_width,
+                                              uint32_t tile_height,
+                                              uint32_t tile_planes,
+                                              uint32_t max_bytes_per_chunk);
 
     /// Free's allocated string storage.
     void storage_properties_destroy(struct StorageProperties* self);

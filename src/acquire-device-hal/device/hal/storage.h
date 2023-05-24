@@ -22,6 +22,10 @@ extern "C"
     enum DeviceStatusCode storage_get(const struct Storage* self,
                                       struct StorageProperties* settings);
 
+    enum DeviceStatusCode storage_get_meta(
+      const struct Storage* self,
+      struct StoragePropertyMetadata* meta);
+
     /// @brief Append data in `[beg,end)` to Storage
     /// @param[in] beg The beginning of the packet of frames to write.
     /// @param[in] end The end of the packet of frames to write.
@@ -32,6 +36,12 @@ extern "C"
     enum DeviceStatusCode storage_close(struct Storage* self);
 
     enum DeviceState storage_get_state(const struct Storage* self);
+
+    /// @brief Alert the storage device to expect a particular image shape.
+    /// @param shape [in] The image shape to expect.
+    enum DeviceStatusCode storage_reserve_image_shape(
+      struct Storage* self,
+      const struct ImageShape* shape);
 
 #ifdef __cplusplus
 }

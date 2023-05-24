@@ -28,11 +28,11 @@ int
 main(int n, char** args)
 {
     int error_code = 0;
-    
+
     // If these fail, you may need a version bump on the interface.
     ASSERT_EQ(int, "%d", sizeof(struct Driver), 40);
     ASSERT_EQ(int, "%d", sizeof(struct Camera), 344);
-    ASSERT_EQ(int, "%d", sizeof(struct Storage), 328);
+    ASSERT_EQ(int, "%d", sizeof(struct Storage), 344);
 
     return error_code;
 }

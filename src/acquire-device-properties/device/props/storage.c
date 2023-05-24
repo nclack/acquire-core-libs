@@ -75,14 +75,32 @@ storage_properties_set_external_metadata(struct StorageProperties* out,
 }
 
 int
+storage_properties_set_chunking_props(struct StorageProperties* out,
+                                      uint32_t tile_width,
+                                      uint32_t tile_height,
+                                      uint32_t tile_planes,
+                                      uint32_t max_bytes_per_chunk)
+{
+    CHECK(out);
+    out->chunking.tile.width = tile_width;
+    out->chunking.tile.height = tile_height;
+    out->chunking.tile.planes = tile_planes;
+    // Use 16 MB default chunk size if 0 is passed in.
+    out->chunking.max_bytes_per_chunk =
+      max_bytes_per_chunk ? max_bytes_per_chunk : (1ULL << 24);
+    return 1;
+Error:
+    return 0;
+}
+
+int
 storage_properties_init(struct StorageProperties* out,
                         uint32_t first_frame_id,
                         const char* filename,
                         size_t bytes_of_filename,
                         const char* metadata,
                         size_t bytes_of_metadata,
-                        struct PixelScale pixel_scale_um,
-                        uint32_t bytes_per_chunk)
+                        struct PixelScale pixel_scale_um)
 {
     // Allocate and copy filename
     memset(out, 0, sizeof(*out)); // NOLINT
@@ -92,8 +110,6 @@ storage_properties_init(struct StorageProperties* out,
     out->first_frame_id = first_frame_id;
     out->pixel_scale_um = pixel_scale_um;
 
-    // Use 64 MB default chunk size if 0 is passed in.
-    out->bytes_per_chunk = bytes_per_chunk ? bytes_per_chunk : (1ULL << 26);
     return 1;
 Error:
     return 0;
@@ -159,15 +175,13 @@ unit_test__storage__storage_property_string_check()
         const char filename[] = "out.tif";
         const char metadata[] = "{\"hello\":\"world\"}";
         const struct PixelScale pixel_scale_um = { 1, 2 };
-        const uint32_t bytes_per_chunk = 32;
         CHECK(storage_properties_init(&props,
                                       0,
                                       filename,
                                       sizeof(filename),
                                       metadata,
                                       sizeof(metadata),
-                                      pixel_scale_um,
-                                      bytes_per_chunk));
+                                      pixel_scale_um));
         CHECK(props.filename.str[props.filename.nbytes - 1] == '\0');
         ASSERT_EQ(int, "%d", props.filename.nbytes, sizeof(filename));
         ASSERT_EQ(int, "%d", props.filename.is_ref, 0);
@@ -179,14 +193,12 @@ unit_test__storage__storage_property_string_check()
         ASSERT_EQ(int, "%d", props.external_metadata_json.is_ref, 0);
         ASSERT_EQ(double, "%g", props.pixel_scale_um.x, 1);
         ASSERT_EQ(double, "%g", props.pixel_scale_um.y, 2);
-        ASSERT_EQ(uint32_t, "%lu", props.bytes_per_chunk, bytes_per_chunk);
     }
 
     {
         const char filename[] = "longer_file_name.tif";
         const char metadata[] = "{\"hello\":\"world\"}";
         const struct PixelScale pixel_scale_um = { 1, 2 };
-        const uint32_t bytes_per_chunk = 62;
         struct StorageProperties src;
         CHECK( // NOLINT
           storage_properties_init(&src,
@@ -195,14 +207,12 @@ unit_test__storage__storage_property_string_check()
                                   sizeof(filename),
                                   metadata,
                                   sizeof(metadata),
-                                  pixel_scale_um,
-                                  bytes_per_chunk));
+                                  pixel_scale_um));
         CHECK(src.filename.str[src.filename.nbytes - 1] == '\0');
         CHECK(src.filename.nbytes == sizeof(filename));
         CHECK(src.filename.is_ref == 0);
         CHECK(src.pixel_scale_um.x == 1);
         CHECK(src.pixel_scale_um.y == 2);
-        CHECK(src.bytes_per_chunk == bytes_per_chunk);
 
         CHECK(src.external_metadata_json
                 .str[src.external_metadata_json.nbytes - 1] == '\0');
@@ -221,7 +231,6 @@ unit_test__storage__storage_property_string_check()
         CHECK(props.external_metadata_json.is_ref == 0);
         CHECK(props.pixel_scale_um.x == 1);
         CHECK(props.pixel_scale_um.y == 2);
-        CHECK(props.bytes_per_chunk == bytes_per_chunk);
     }
     storage_properties_destroy(&props);
     return 1;
@@ -323,6 +332,32 @@ unit_test__storage__copy_string()
 
     free(src.str);
     free(dst.str);
+
+    return 1;
+Error:
+    return 0;
+}
+
+int
+unit_test__storage_properties_set_chunking_props()
+{
+    struct StorageProperties props = { 0 };
+    CHECK(0 == props.chunking.tile.width);
+    CHECK(0 == props.chunking.tile.height);
+    CHECK(0 == props.chunking.tile.planes);
+    CHECK(0 == props.chunking.max_bytes_per_chunk);
+
+    const uint32_t tile_width = 1, tile_height = 2, tile_planes = 3;
+    CHECK(storage_properties_set_chunking_props(
+      &props, tile_width, tile_height, tile_planes, 0));
+
+    CHECK(tile_width == props.chunking.tile.width);
+    CHECK(tile_height == props.chunking.tile.height);
+    CHECK(tile_planes == props.chunking.tile.planes);
+    // This is the default value if you set bytes_per_chunk to 0
+    CHECK((1ULL << 24) == props.chunking.max_bytes_per_chunk);
+
+    storage_properties_destroy(&props);
 
     return 1;
 Error:

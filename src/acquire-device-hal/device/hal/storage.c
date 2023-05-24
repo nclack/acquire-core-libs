@@ -114,6 +114,18 @@ Error:
 }
 
 enum DeviceStatusCode
+storage_get_meta(const struct Storage* self,
+                 struct StoragePropertyMetadata* meta)
+{
+    CHECK(self);
+    CHECK(self->get_meta);
+    self->get_meta(self, meta);
+    return Device_Ok;
+Error:
+    return Device_Err;
+}
+
+enum DeviceStatusCode
 storage_append(struct Storage* self,
                const struct VideoFrame* beg,
                const struct VideoFrame* end)
@@ -161,4 +173,16 @@ storage_get_state(const struct Storage* const self)
     return self->state;
 Error:
     return DeviceState_Closed;
+}
+
+enum DeviceStatusCode
+storage_reserve_image_shape(struct Storage* self,
+                            const struct ImageShape* shape)
+{
+    CHECK(self);
+    CHECK(self->reserve_image_shape);
+    self->reserve_image_shape(self, shape);
+    return Device_Ok;
+Error:
+    return Device_Err;
 }
