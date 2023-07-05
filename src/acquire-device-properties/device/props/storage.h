@@ -31,6 +31,9 @@ extern "C"
                 uint32_t width, height, planes;
             } tile;
         } chunking;
+
+        /// Enable multiscale storage if true.
+        uint8_t enable_multiscale;
     };
 
     struct StoragePropertyMetadata
@@ -47,6 +50,11 @@ extern "C"
                 struct Property width, height, planes;
             } tile;
         } chunking;
+
+        struct storage_property_metadata_multiscale_s
+        {
+            uint8_t supported;
+        } multiscale;
     };
 
     /// Initializes StorageProperties, allocating string storage on the heap
@@ -116,6 +124,14 @@ extern "C"
                                               uint32_t tile_height,
                                               uint32_t tile_planes,
                                               uint64_t max_bytes_per_chunk);
+
+    /// @brief Set multiscale properties for `out`.
+    /// Convenience function to enable multiscale.
+    /// @returns 1 on success, otherwise 0
+    /// @param[in, out] out The storage properties to change.
+    /// @param[in] enable A flag to enable or disable multiscale.
+    int storage_properties_set_enable_multiscale(struct StorageProperties* out,
+                                                 uint8_t enable);
 
     /// Free's allocated string storage.
     void storage_properties_destroy(struct StorageProperties* self);

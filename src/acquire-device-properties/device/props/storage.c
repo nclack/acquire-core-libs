@@ -94,6 +94,17 @@ Error:
 }
 
 int
+storage_properties_set_enable_multiscale(struct StorageProperties* out,
+                                         uint8_t enable)
+{
+    CHECK(out);
+    out->enable_multiscale = enable;
+    return 1;
+Error:
+    return 0;
+}
+
+int
 storage_properties_init(struct StorageProperties* out,
                         uint32_t first_frame_id,
                         const char* filename,
