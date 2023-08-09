@@ -12,7 +12,7 @@
 #define L (aq_logger)
 #define LOG(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 #define LOGE(...) L(1, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define TRACE(...) LOG(__VA_ARGS__)
+#define TRACE(...)
 #define EXPECT(e, ...)                                                         \
     do {                                                                       \
         if (!(e)) {                                                            \
