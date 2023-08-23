@@ -61,6 +61,14 @@ extern "C"
         enum DeviceStatusCode (*shutdown)(struct Driver* self);
     };
 
+    /// Entry point for the driver adapter.
+    ///
+    /// Any resources allocated by this function should be released by
+    /// `Driver::shutdown()`.
+    ///
+    /// @param[in] reporter Callback provided by the acquire runtime for
+    ///                     logging messages. The callback assumes strings
+    ///                     have the lifetime of the caller.
     acquire_export struct Driver* acquire_driver_init_v0(
       void (*reporter)(int is_error,
                        const char* file,
