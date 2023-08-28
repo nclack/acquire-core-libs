@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Removes 30-second timeout from `thread_join` on Windows. 
+
 ### Added
 
 - `acquire-device-properties`: A `uint8_t` member `enable_multiscale` of `StorageProperties`.
