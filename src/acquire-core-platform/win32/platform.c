@@ -439,7 +439,7 @@ thread_join(struct thread* self)
         self->inner_ = INVALID_HANDLE_VALUE;
         TRACE("WFSO %p", thread);
         WaitForSingleObject(thread,
-                            30000); // FIXME: (nclack) set this back to INFINITE
+                            INFINITE);
         CloseHandle(thread);
     }
 }
