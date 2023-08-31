@@ -74,7 +74,7 @@ file_create(struct file* file, const char* filename, size_t bytes_of_filename)
 
     CHECK_HANDLE(file->hfile = CreateFileA(filename,
                                            GENERIC_WRITE,
-                                           FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                           FILE_SHARE_READ,
                                            0,
                                            CREATE_ALWAYS,
                                            FILE_FLAG_OVERLAPPED,
