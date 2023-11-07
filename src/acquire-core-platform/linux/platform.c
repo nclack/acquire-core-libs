@@ -37,8 +37,10 @@ int
 file_create(struct file* file, const char* filename, size_t bytesof_filename)
 {
     file->fid = open(filename, O_RDWR | O_CREAT | O_EXCL | O_NONBLOCK, 0666);
-    if (file->fid < 0)
+    if (file->fid < 0) {
+        LOGE("Failed to create \"%s\"", filename);
         CHECK_POSIX(errno);
+    }
     return 1;
 Error:
     return 0;
