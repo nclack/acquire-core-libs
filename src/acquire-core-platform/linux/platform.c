@@ -39,8 +39,11 @@ file_create(struct file* file, const char* filename, size_t bytesof_filename)
 {
     file->fid = open(filename, O_RDWR | O_CREAT | O_NONBLOCK, 0666);
     if (file->fid < 0) {
+        CHECK_POSIX(errno);
+    } else {
         int ret = flock(file->fid, LOCK_EX | LOCK_NB);
         if (ret < 0) {
+            LOGE("Failed to create existing file \"%s\"", filename);
             int tmp = errno;
             close(file->fid);
             CHECK_POSIX(tmp);
